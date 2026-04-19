@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jules & Carter — Registry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #faf8f4; color: #2a2a2a; min-height: 100vh; }
+    .page { max-width: 740px; margin: 0 auto; padding: 0 1.25rem 3rem; }
+
+    .rg-header { text-align: center; padding: 3rem 1rem 2rem; border-bottom: 1px solid #e2ddd3; }
+    .pines { display: flex; justify-content: center; align-items: flex-end; gap: 5px; margin-bottom: 1.25rem; }
+    .pine { background: #4a5e42; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); }
+    .rg-header h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 38px; font-weight: 300; letter-spacing: 0.04em; color: #1e2b1f; margin-bottom: 6px; }
+    .rg-header .sub { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8478; }
+
+    .rg-intro { text-align: center; padding: 1.5rem 2rem; font-size: 15px; color: #6b6560; line-height: 1.75; border-bottom: 1px solid #e2ddd3; }
+    .rg-intro a { color: #4a5e42; }
+
+    .sec-lbl { font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: #9a9288; text-align: center; padding: 1.75rem 0 1.1rem; }
+    .loading { text-align: center; padding: 2rem; font-size: 13px; color: #9a9288; }
+
+    .gift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; padding-bottom: 1rem; }
+    .gift-card { background: #ffffff; border: 1px solid #e2ddd3; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; transition: opacity 0.3s ease; }
+    .gift-card.claimed { opacity: 0.5; }
+
+    .g-img { width: 100%; height: 160px; object-fit: cover; background: #eef0e8; display: block; }
+    .g-img-placeholder { width: 100%; height: 160px; background: #eef0e8; display: flex; align-items: center; justify-content: center; }
+    .g-img-placeholder svg { width: 32px; height: 32px; stroke: #9aac8c; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+    .g-body { padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .g-name { font-size: 14px; font-weight: 500; color: #1e2b1f; line-height: 1.35; }
+    .g-note { font-size: 12px; color: #7a746e; line-height: 1.55; flex: 1; }
+    .g-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid #ede9e0; margin-top: 6px; gap: 8px; flex-wrap: wrap; }
+    .g-price { font-size: 13px; font-weight: 500; color: #2a2a2a; flex-shrink: 0; }
+    .g-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+    .btn-forest { font-size: 12px; color: #4a5e42; background: none; border: 1px solid #9aac8c; border-radius: 20px; padding: 5px 13px; cursor: pointer; text-decoration: none; display: inline-block; font-family: inherit; transition: background 0.15s; white-space: nowrap; }
+    .btn-forest:hover { background: #eef0e8; }
+    .btn-forest:disabled { opacity: 0.45; cursor: default; background: none; }
+    .claimed-lbl { font-size: 12px; color: #9a9288; font-style: italic; }
+
+    .modal-backdrop { display: none; min-height: 280px; background: rgba(30,43,31,0.45); border-radius: 12px; align-items: center; justify-content: center; margin: 1rem 0; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: #ffffff; border-radius: 12px; padding: 1.75rem; max-width: 340px; width: 100%; text-align: center; }
+    .modal h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; font-weight: 300; color: #1e2b1f; margin-bottom: 8px; }
+    .modal p { font-size: 13px; color: #6b6560; line-height: 1.6; margin-bottom: 1.25rem; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+
+    .divider { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.75rem 0; }
+    .divider-line { width: 70px; height: 1px; background: #e2ddd3; }
+    .divider-dot { width: 4px; height: 4px; background: #9aac8c; border-radius: 50%; }
+
+    .cb-row { background: #ffffff; border: 1px solid #e2ddd3; border-radius: 12px; padding: 1.1rem 1.4rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; }
+    .cb-row h3 { font-size: 14px; font-weight: 500; color: #1e2b1f; margin-bottom: 3px; }
+    .cb-row p { font-size: 13px; color: #7a746e; }
+
+    .rg-footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 12px; color: #b0aa9e; border-top: 1px solid #e2ddd3; margin-top: 1.5rem; }
+    .admin-trigger { font-size: 12px; color: #d9d4ca; background: none; border: none; cursor: pointer; margin-top: 8px; letter-spacing: 0.2em; font-family: inherit; }
+    .admin-trigger:hover { color: #9a9288; }
+
+    .admin-panel { display: none; margin: 1rem 0; background: #f5f2ec; border: 1px solid #e2ddd3; border-radius: 12px; padding: 1.4rem; }
+    .admin-panel h2 { font-size: 14px; font-weight: 500; color: #1e2b1f; margin-bottom: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .form-full { grid-template-columns: 1fr; }
+    .field-lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a9288; margin-bottom: 4px; }
+    .field-hint { font-size: 11px; color: #b0aa9e; text-transform: none; letter-spacing: 0; }
+    .admin-panel input, .admin-panel textarea { width: 100%; font-size: 13px; padding: 8px 11px; border: 1px solid #d4cfc6; border-radius: 8px; background: #ffffff; color: #2a2a2a; font-family: inherit; outline: none; resize: none; }
+    .admin-panel input:focus, .admin-panel textarea:focus { border-color: #9aac8c; }
+    .admin-panel input::placeholder, .admin-panel textarea::placeholder { color: #b0aa9e; }
+
+    .img-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #d4cfc6; display: none; margin-top: 6px; }
+
+    .add-btn { margin-top: 10px; width: 100%; font-size: 13px; color: #4a5e42; background: #eef0e8; border: 1px solid #9aac8c; border-radius: 20px; padding: 9px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .add-btn:hover { background: #e2e6d8; }
+    .add-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .pw-row { display: flex; gap: 8px; margin-bottom: 0.75rem; }
+    .pw-row input { flex: 1; }
+    .pw-btn { font-size: 13px; color: #4a5e42; background: none; border: 1px solid #9aac8c; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-family: inherit; }
+    .pw-err { font-size: 12px; color: #b94040; margin: -4px 0 10px; display: none; }
+
+    .admin-items { margin-top: 1.1rem; border-top: 1px solid #e2ddd3; padding-top: 1rem; }
+    .admin-items-lbl { font-size: 12px; color: #9a9288; margin-bottom: 8px; }
+    .admin-item-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #6b6560; padding: 7px 0; border-bottom: 1px solid #ede9e0; gap: 8px; }
+    .admin-item-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .admin-item-name { font-weight: 500; color: #1e2b1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .admin-item-meta { font-size: 11px; color: #9a9288; }
+    .del-btn { font-size: 11px; color: #9a9288; background: none; border: 1px solid #d4cfc6; border-radius: 12px; padding: 3px 9px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+    .del-btn:hover { color: #b94040; border-color: #e0a0a0; }
+    .reset-btn { font-size: 11px; color: #4a5e42; background: none; border: 1px solid #9aac8c; border-radius: 12px; padding: 3px 9px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+
+    .status-msg { font-size: 12px; text-align: center; padding: 7px; border-radius: 8px; margin-top: 8px; display: none; }
+    .status-msg.ok { background: #eef0e8; color: #4a5e42; display: block; }
+    .status-msg.err { background: #fdf0f0; color: #b94040; display: block; }
+
+    @media (max-width: 500px) {
+      .rg-header h1 { font-size: 30px; }
+      .form-row { grid-template-columns: 1fr; }
+      .cb-row { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="rg-header">
+    <div class="pines">
+      <div class="pine" style="width:6px;height:7px;opacity:.4"></div>
+      <div class="pine" style="width:8px;height:10px;opacity:.6"></div>
+      <div class="pine" style="width:12px;height:14px"></div>
+      <div class="pine" style="width:8px;height:10px;opacity:.6"></div>
+      <div class="pine" style="width:6px;height:7px;opacity:.4"></div>
+    </div>
+    <h1>Jules &amp; Carter</h1>
+    <p class="sub">Wedding Registry &nbsp;·&nbsp; September 26, 2026</p>
+  </header>
+
+  <div class="rg-intro">
+    Your presence at our celebration is the greatest gift of all.
+    If you'd like to give something, we've listed a few things below —
+    or browse our full list at
+    <a href="https://www.crateandbarrel.com/gift-registry" target="_blank">Crate &amp; Barrel</a>.
+  </div>
+
+  <main>
+    <p class="sec-lbl">a few things we'd love</p>
+    <div id="loading" class="loading">Loading registry...</div>
+    <div class="gift-grid" id="gift-grid"></div>
+
+    <div class="modal-backdrop" id="modal">
+      <div class="modal">
+        <h3>Marking as gifted</h3>
+        <p id="modal-msg">Once you mark this as gifted, other guests will see it's taken care of. Have you completed your purchase?</p>
+        <div class="modal-btns">
+          <button class="btn-forest" onclick="window._closeModal()">Go back</button>
+          <button class="btn-forest" style="background:#eef0e8" onclick="window._confirmClaim()">Yes, I purchased it</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider">
+      <div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div>
+    </div>
+
+    <p class="sec-lbl">full registry</p>
+    <div class="cb-row">
+      <div>
+        <h3>Crate &amp; Barrel registry</h3>
+        <p>Browse our complete list of kitchen, home, and entertaining items.</p>
+      </div>
+      <a href="https://www.crateandbarrel.com/gift-registry" target="_blank" class="btn-forest">View registry</a>
+    </div>
+
+    <div class="admin-panel" id="admin-panel">
+      <h2>Manage registry</h2>
+      <div id="pw-section">
+        <div class="pw-row">
+          <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')window._checkPw()" />
+          <button class="pw-btn" onclick="window._checkPw()">Unlock</button>
+        </div>
+        <p class="pw-err" id="pw-err">Incorrect password — try again.</p>
+      </div>
+      <div id="admin-form" style="display:none">
+        <div class="form-row form-full">
+          <div class="field-lbl">Purchase link</div>
+          <input type="url" id="a-link" placeholder="https://www.amazon.com/dp/..." />
+        </div>
+        <div class="form-row">
+          <div>
+            <div class="field-lbl">Item name</div>
+            <input type="text" id="a-name" placeholder="e.g. Cast iron skillet" />
+          </div>
+          <div>
+            <div class="field-lbl">Price</div>
+            <input type="text" id="a-price" placeholder="e.g. $75" />
+          </div>
+        </div>
+        <div class="form-row form-full">
+          <div class="field-lbl">Short description</div>
+          <textarea id="a-note" rows="2" placeholder="One or two sentences about the item..."></textarea>
+        </div>
+        <div class="form-row form-full">
+          <div class="field-lbl">Image URL &nbsp;<span class="field-hint">— right-click any product photo → "Copy image address"</span></div>
+          <input type="url" id="a-img" placeholder="https://..." oninput="window._previewImg()" />
+          <img id="img-preview" class="img-preview" alt="preview" />
+        </div>
+        <button class="add-btn" id="add-btn" onclick="window._addItem()">Add to registry</button>
+        <p class="status-msg" id="add-status"></p>
+        <div class="admin-items" id="admin-items"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="rg-footer">
+    Made with love &nbsp;·&nbsp; julesandcarter.com/registry
+    <br><button class="admin-trigger" onclick="window._toggleAdmin()">· · ·</button>
+  </footer>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = initializeApp({
+    apiKey: "AIzaSyA6XM1UPQYeEDL1uR-jScSmCI8jfkET8AY",
+    authDomain: "registry-15320.firebaseapp.com",
+    projectId: "registry-15320",
+    storageBucket: "registry-15320.firebasestorage.app",
+    messagingSenderId: "609128168444",
+    appId: "1:609128168444:web:26dcb89a2cc81f15451079"
+  });
+
+  const db = getFirestore(app);
+  const giftsCol = collection(db, 'gifts');
+  const giftsQ = query(giftsCol, orderBy('createdAt', 'asc'));
+
+  const ADMIN_PW = 'yosemite2026';
+  let adminUnlocked = false;
+  let pendingClaimId = null;
+  let gifts = [];
+
+  function imgBlock(g) {
+    if (g.img) {
+      return `<img class="g-img" src="${g.img}" alt="${g.name}"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <div class="g-img-placeholder" style="display:none">${placeholderSvg()}</div>`;
+    }
+    return `<div class="g-img-placeholder">${placeholderSvg()}</div>`;
+  }
+
+  function placeholderSvg() {
+    return `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`;
+  }
+
+  function render() {
+    document.getElementById('loading').style.display = 'none';
+    const grid = document.getElementById('gift-grid');
+    grid.innerHTML = '';
+
+    if (!gifts.length) {
+      grid.innerHTML = `<p style="font-size:14px;color:#9a9288;text-align:center;padding:1rem 0;grid-column:1/-1">
+        Items coming soon — check back shortly!</p>`;
+      if (adminUnlocked) renderAdminItems();
+      return;
+    }
+
+    gifts.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'gift-card' + (g.claimed ? ' claimed' : '');
+      const viewBtn = g.link
+        ? `<a href="${g.link}" class="btn-forest" target="_blank" rel="noopener">View item</a>` : '';
+      const claimEl = g.claimed
+        ? `<span class="claimed-lbl">Gifted — thank you!</span>`
+        : `<button class="btn-forest" onclick="window._openModal('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')">I'll gift this</button>`;
+      card.innerHTML = `${imgBlock(g)}
+        <div class="g-body">
+          <div class="g-name">${g.name || ''}</div>
+          <div class="g-note">${g.note || ''}</div>
+          <div class="g-foot">
+            <span class="g-price">${g.price || ''}</span>
+            <div class="g-actions">${viewBtn}${claimEl}</div>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    if (adminUnlocked) renderAdminItems();
+  }
+
+  function renderAdminItems() {
+    const el = document.getElementById('admin-items');
+    if (!el) return;
+    el.innerHTML = `<p class="admin-items-lbl">Current items (${gifts.length})</p>`;
+    if (!gifts.length) { el.innerHTML += `<p style="font-size:13px;color:#9a9288">No items yet.</p>`; return; }
+    gifts.forEach(g => {
+      const row = document.createElement('div');
+      row.className = 'admin-item-row';
+      const claimedTag = g.claimed ? ' · <span style="color:#9aac8c">gifted</span>' : '';
+      const resetBtn = g.claimed
+        ? `<button class="reset-btn" onclick="window._unclaimItem('${g.id}')">Reset</button>` : '';
+      row.innerHTML = `
+        <div class="admin-item-info">
+          <span class="admin-item-name">${g.name}</span>
+          <span class="admin-item-meta">${g.price}${claimedTag}</span>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          ${resetBtn}
+          <button class="del-btn" onclick="window._deleteItem('${g.id}','${(g.name||'').replace(/'/g,"\\'")}')">Remove</button>
+        </div>`;
+      el.appendChild(row);
+    });
+  }
+
+  function showStatus(id, msg, ok) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'status-msg ' + (ok ? 'ok' : 'err');
+    setTimeout(() => { el.className = 'status-msg'; }, 4000);
+  }
+
+  onSnapshot(giftsQ, snap => {
+    gifts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }, err => {
+    document.getElementById('loading').textContent = 'Unable to load registry. Please refresh.';
+    console.error(err);
+  });
+
+  window._openModal = (id, name) => {
+    pendingClaimId = id;
+    document.getElementById('modal-msg').textContent =
+      `Once you mark "${name}" as gifted, other guests will see it's been taken care of. Have you completed your purchase?`;
+    document.getElementById('modal').classList.add('open');
+  };
+
+  window._closeModal = () => {
+    document.getElementById('modal').classList.remove('open');
+    pendingClaimId = null;
+  };
+
+  window._confirmClaim = async () => {
+    if (!pendingClaimId) return;
+    try { await updateDoc(doc(db, 'gifts', pendingClaimId), { claimed: true }); }
+    catch(e) { console.error(e); }
+    window._closeModal();
+  };
+
+  window._toggleAdmin = () => {
+    const p = document.getElementById('admin-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+  };
+
+  window._checkPw = () => {
+    if (document.getElementById('pw-input').value === ADMIN_PW) {
+      adminUnlocked = true;
+      document.getElementById('pw-section').style.display = 'none';
+      document.getElementById('admin-form').style.display = 'block';
+      renderAdminItems();
+    } else {
+      document.getElementById('pw-err').style.display = 'block';
+    }
+  };
+
+  window._previewImg = () => {
+    const url = document.getElementById('a-img').value.trim();
+    const el = document.getElementById('img-preview');
+    if (url) { el.src = url; el.style.display = 'block'; }
+    else { el.style.display = 'none'; }
+  };
+
+  window._addItem = async () => {
+    const name  = document.getElementById('a-name').value.trim();
+    const price = document.getElementById('a-price').value.trim();
+    const note  = document.getElementById('a-note').value.trim();
+    const link  = document.getElementById('a-link').value.trim();
+    const img   = document.getElementById('a-img').value.trim();
+    if (!name || !price) { showStatus('add-status', 'Please fill in at least a name and price.', false); return; }
+    const btn = document.getElementById('add-btn');
+    btn.disabled = true; btn.textContent = 'Adding...';
+    try {
+      await addDoc(giftsCol, { name, price, note, link, img, claimed: false, createdAt: Date.now() });
+      ['a-name','a-price','a-note','a-link','a-img'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('img-preview').style.display = 'none';
+      showStatus('add-status', `"${name}" added to registry.`, true);
+    } catch(e) {
+      showStatus('add-status', 'Something went wrong — please try again.', false);
+    }
+    btn.disabled = false; btn.textContent = 'Add to registry';
+  };
+
+  window._deleteItem = async (id, name) => {
+    if (!confirm(`Remove "${name}" from the registry?`)) return;
+    try { await deleteDoc(doc(db, 'gifts', id)); } catch(e) { console.error(e); }
+  };
+
+  window._unclaimItem = async (id) => {
+    try { await updateDoc(doc(db, 'gifts', id), { claimed: false }); } catch(e) { console.error(e); }
+  };
+</script>
+</body>
+</html>
